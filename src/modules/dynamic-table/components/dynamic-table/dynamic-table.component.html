@@ -1,0 +1,14 @@
+<div *ngFor="let source of sources">
+  <ul>
+    <li *ngFor="let key of displayedColumns">
+      <span>{{ findColumnByKey(key)?.label }}</span>
+      <span>
+        <ng-template
+          [ngTemplateOutlet]="findColumnByKey(key)?.template || default"
+          [ngTemplateOutletContext]="{ $implicit: source }"
+        ></ng-template>
+      </span>
+    </li>
+  </ul>
+</div>
+<ng-template #default></ng-template>

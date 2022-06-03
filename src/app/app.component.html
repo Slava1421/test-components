@@ -1,0 +1,40 @@
+<!-- <app-dynamic-table [defaultColumns]="defaultColumns" [source$]="sources$"></app-dynamic-table>
+<ng-container *libProvidePropertyDefValue="let element; id: 'id'">
+  {{ element.id }}
+</ng-container>
+<ng-container *libProvidePropertyDefValue="let element; id: 'title'">
+  {{ element.title }}
+</ng-container> -->
+
+<!-- <app-comp-parent></app-comp-parent> -->
+
+<div style="padding: 24px;">
+  <honey-table #table [dataSource]="dataSource">
+
+    <ng-container honeyColumnDef="position">
+      <honey-header-cell *honeyHeaderCellDef> No. </honey-header-cell>
+      <honey-cell *honeyCellDef="let element"> {{ element.position }} </honey-cell>
+    </ng-container>
+
+    <!-- Name Column -->
+    <ng-container honeyColumnDef="name">
+      <honey-header-cell *honeyHeaderCellDef> Name </honey-header-cell>
+      <honey-cell *honeyCellDef="let element"> {{ element.name }} </honey-cell>
+    </ng-container>
+
+    <!-- Weight Column -->
+    <ng-container honeyColumnDef="weight">
+      <honey-header-cell *honeyHeaderCellDef> Weight </honey-header-cell>
+      <honey-cell *honeyCellDef="let element"> {{ element.weight }} </honey-cell>
+    </ng-container>
+
+    <!-- Symbol Column -->
+    <ng-container honeyColumnDef="symbol">
+      <honey-header-cell *honeyHeaderCellDef> Symbol </honey-header-cell>
+      <honey-cell *honeyCellDef="let element"> {{ element.symbol }} </honey-cell>
+    </ng-container>
+
+    <honey-header-row *honeyHeaderRowDef="displayedColumns"></honey-header-row>
+    <honey-row *honeyRowDef="let row; columns: displayedColumns"></honey-row>
+  </honey-table>
+</div>
