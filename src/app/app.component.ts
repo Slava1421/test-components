@@ -10,7 +10,7 @@ import { _MatTableDataSource } from 'src/modules/table/shared/table-data-source'
 })
 export class AppComponent  {
   name = 'Angular 5';
-  displayedColumns = ['position', 'name', 'weight', 'symbol'];
+  displayedColumns = [ 'name', 'weight', 'symbol', 'position'];
   dataSource = new _MatTableDataSource<Element>(ELEMENT_DATA);
 }
 

@@ -69,10 +69,7 @@ export class NoDataRowOutlet implements RowOutlet {
   constructor(public viewContainer: ViewContainerRef, public elementRef: ElementRef) { }
 }
 
-export interface RowContext<T>
-  extends HoneyCellOutletRowContext<T> { }
-
-abstract class RowViewRef<T> extends EmbeddedViewRef<RowContext<T>> { }
+export interface RowContext<T> extends HoneyCellOutletRowContext<T> { }
 
 export interface RenderRow<T> {
   data: T;
@@ -82,7 +79,6 @@ export interface RenderRow<T> {
 
 @Component({
   selector: 'honey-table, table[honey-table]',
-  // exportAs: 'honeyTable',
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss'],
   host: { 'class': 'honey-table' },
@@ -92,6 +88,7 @@ export interface RenderRow<T> {
   encapsulation: ViewEncapsulation.None
 })
 export class HoneyTable<T> implements AfterContentInit {
+
   @Input()
   get dataSource(): HoneyTableDataSourceInput<T> {
     return this._dataSource;
@@ -126,10 +123,15 @@ export class HoneyTable<T> implements AfterContentInit {
 
   @Output() readonly contentChanged = new EventEmitter<void>();
 
+  cl(): void {
+    console.log(this._contentRowDefs);
+
+  }
+
   ngAfterContentInit() {
 
     this._cacheColumnDefs();
-    this.renderHeadRow();
+    this._renderHeadRow();
     this._observeRenderChanges();
   }
 
@@ -179,7 +181,7 @@ export class HoneyTable<T> implements AfterContentInit {
       });
   }
 
-  renderHeadRow(): void {
+  _renderHeadRow(): void {
     this.renderRow(this._headerRowOutlet, this._contentHeaderRowDefs.first, 0);
   }
 
@@ -189,19 +191,20 @@ export class HoneyTable<T> implements AfterContentInit {
       this._renderRows.forEach(row => {
         this.renderRow(this._rowOutlet, row.rowDef, row.dataIndex, { $implicit: row.data });
       });
-
     }
-
   }
 
-  private renderRow(outlet: RowOutlet,
+  private renderRow(
+    outlet: RowOutlet,
     rowDef: BaseRowDef,
     index: number,
     context: RowContext<T> = {},
   ) {
     outlet.viewContainer.createEmbeddedView(rowDef.template, context, index);
 
-    for (const cell of this._getCellTemplates(rowDef)) {
+    const cellTpls = this._getCellTemplates(rowDef);
+
+    for (const cell of cellTpls) {
       HoneyCellOutlet.mostRecentCellOutlet._viewContainer.createEmbeddedView(cell, context);
     }
   }
@@ -212,9 +215,9 @@ export class HoneyTable<T> implements AfterContentInit {
     }
     return Array.from(rowDef.columns, columnId => {
       const column = this._columnDefsByName.get(columnId);
+      const tpl = rowDef.extractCellTemplate(column!);
 
-
-      return rowDef.extractCellTemplate(column!);
+      return tpl;
     });
   }
 
