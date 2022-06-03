@@ -85,7 +85,7 @@ export interface RenderRow<T> {
   // exportAs: 'honeyTable',
   templateUrl: './table.component.html',
   styleUrls: ['./table.component.scss'],
-  host: {'class': 'honey-table'},
+  host: { 'class': 'honey-table' },
   providers: [
     { provide: HONEY_TABLE, useExisting: HoneyTable },
   ],
@@ -187,13 +187,13 @@ export class HoneyTable<T> implements AfterContentInit {
     if (this._contentRowDefs) {
       this._renderRows = this._getAllRenderRows();
       this._renderRows.forEach(row => {
-        this.renderRow(this._rowOutlet, row.rowDef, row.dataIndex, {$implicit: row.data});
+        this.renderRow(this._rowOutlet, row.rowDef, row.dataIndex, { $implicit: row.data });
       });
-        
+
     }
 
   }
-  
+
   private renderRow(outlet: RowOutlet,
     rowDef: BaseRowDef,
     index: number,
@@ -223,7 +223,7 @@ export class HoneyTable<T> implements AfterContentInit {
 
     this._data.forEach((data, i) => {
       const r = this._getRenderRowsForData(data, i);
-      r.forEach(item => rowDefs.push(item))
+      rowDefs.push(r);
     });
 
     return rowDefs;
@@ -232,19 +232,8 @@ export class HoneyTable<T> implements AfterContentInit {
   private _getRenderRowsForData(
     data: T,
     dataIndex: number,
-  ): RenderRow<T>[] {
-    const rowDefs = this._getRowDefs(data, dataIndex);
-
-    return rowDefs.map(rowDef => {
-        return {data, rowDef, dataIndex};
-    });
-  }
-
-  _getRowDefs(data: T, dataIndex: number): HoneyRowDef<T>[] {
-
-    const rowDefs: HoneyRowDef<T>[] = [];
-    rowDefs.push(this._contentRowDefs.first);
-
-    return rowDefs;
+  ): RenderRow<T> {
+    const rowDef = this._contentRowDefs.first;
+    return { data, rowDef, dataIndex };
   }
 }
