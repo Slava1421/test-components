@@ -8,11 +8,13 @@
 
 <!-- <app-comp-parent></app-comp-parent> -->
 
+<!-- <button (click)="dd()"></button> -->
+
 <div style="padding: 24px;">
   <honey-table #table [dataSource]="dataSource">
 
     <ng-container honeyColumnDef="position">
-      <honey-header-cell *honeyHeaderCellDef> position. </honey-header-cell>
+      <honey-header-cell *honeyHeaderCellDef (click)="dd(3)"> position. </honey-header-cell>
       <honey-cell *honeyCellDef="let element"> {{ element.position }} </honey-cell>
     </ng-container>
 
@@ -34,7 +36,8 @@
       <honey-cell *honeyCellDef="let element"> {{ element.symbol }} </honey-cell>
     </ng-container>
 
+
     <honey-header-row *honeyHeaderRowDef="displayedColumns"></honey-header-row>
-    <honey-row *honeyRowDef="let row; columns: displayedColumns"></honey-row>
+    <honey-row *honeyRowDef="let row; columns: displayedColumns" (click)="dd(row)"></honey-row>
   </honey-table>
 </div>

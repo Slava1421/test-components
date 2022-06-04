@@ -23,8 +23,6 @@ export class HoneyHeaderCellDef implements CellDef {
   constructor(/** @docs-private */ public template: TemplateRef<any>) {}
 }
 
-class HoneyColumnDefBase {}
-
 @Directive({
   selector: '[honeyColumnDef]',
   inputs: ['sticky'],

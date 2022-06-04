@@ -11,6 +11,8 @@ import {
   EventEmitter,
   HostBinding,
   Input,
+  IterableDiffer,
+  IterableDiffers,
   OnInit,
   Output,
   QueryList,
@@ -25,6 +27,7 @@ import {
   HoneyCellOutletRowContext,
   HoneyHeaderRowDef,
   HoneyNoDataRow,
+  HoneyRow,
   HoneyRowDef,
 } from '../../directives/row';
 
@@ -44,7 +47,7 @@ import {
 import { takeUntil } from 'rxjs/operators';
 
 @Directive({
-  selector: 'honey-table[recycleRows], table[honey-table][recycleRows]',
+  selector: 'honey-table[recycleRows], table[honey-table]',
 })
 export class HoneyRecycleRows { }
 
@@ -87,7 +90,7 @@ export interface RenderRow<T> {
   ],
   encapsulation: ViewEncapsulation.None
 })
-export class HoneyTable<T> implements AfterContentInit {
+export class HoneyTable<T> implements AfterContentInit, OnInit, AfterContentChecked {
 
   @Input()
   get dataSource(): HoneyTableDataSourceInput<T> {
@@ -107,6 +110,8 @@ export class HoneyTable<T> implements AfterContentInit {
   private _renderRows: RenderRow<T>[];
   protected _data: readonly T[];
 
+  private _dataDiffer: IterableDiffer<RenderRow<T>>;
+
   readonly viewChange = new BehaviorSubject<{ start: number; end: number }>({
     start: 0,
     end: Number.MAX_VALUE,
@@ -119,13 +124,35 @@ export class HoneyTable<T> implements AfterContentInit {
   @ContentChildren(HoneyColumnDef, { descendants: true }) _contentColumnDefs: QueryList<HoneyColumnDef>;
   @ContentChildren(HoneyRowDef, { descendants: true }) _contentRowDefs: QueryList<HoneyRowDef<T>>;
   @ContentChildren(HoneyHeaderRowDef, { descendants: true, }) _contentHeaderRowDefs: QueryList<HoneyHeaderRowDef>;
+  @ContentChildren(HoneyRow, { descendants: true, }) ss: QueryList<HoneyRow>;
   @ContentChild(HoneyNoDataRow) _noDataRow: HoneyNoDataRow;
 
   @Output() readonly contentChanged = new EventEmitter<void>();
 
   cl(): void {
     console.log(this._contentRowDefs);
+    const viewContainer = this._rowOutlet.viewContainer;
+    for (let renderIndex = 0, count = viewContainer.length; renderIndex < count; renderIndex++) {
+      const viewRef = viewContainer.get(renderIndex);
+      // const context = viewRef.context;
+      // context.count = count;
+      // context.first = renderIndex === 0;
+      // context.last = renderIndex === count - 1;
+      // context.even = renderIndex % 2 === 0;
+      // context.odd = !context.even;
+    }
+  }
 
+  constructor(protected readonly _differs: IterableDiffers,) { }
+
+  ngOnInit(): void {
+    this._dataDiffer = this._differs.find([]).create((_i: number, dataRow: RenderRow<T>) => {
+      return dataRow;
+    });
+  }
+
+  ngAfterContentChecked() {
+    this._renderUpdatedColumns();
   }
 
   ngAfterContentInit() {
@@ -133,6 +160,29 @@ export class HoneyTable<T> implements AfterContentInit {
     this._cacheColumnDefs();
     this._renderHeadRow();
     this._observeRenderChanges();
+
+  }
+
+  private _renderUpdatedColumns(): void {
+    const columnsDiffReducer = (acc: boolean, def: BaseRowDef) => acc || !!def.getColumnsDiff();
+
+    // Force re-render data rows if the list of column definitions have changed.
+    const dataColumnsChanged = this._contentRowDefs.reduce(columnsDiffReducer, false);
+    if (dataColumnsChanged) {
+      this._dataDiffer.diff([]);
+      this._rowOutlet.viewContainer.clear();
+      this.renderRows();
+    }
+
+    // Force re-render header/footer rows if the list of column definitions have changed.
+    const headerColumnsChanged = this._contentHeaderRowDefs.reduce(columnsDiffReducer, false);
+    if (headerColumnsChanged) {
+      if (this._headerRowOutlet.viewContainer.length > 0) {
+        this._headerRowOutlet.viewContainer.clear();
+      }
+
+      this._renderHeadRow();
+    }
   }
 
   private _cacheColumnDefs() {
